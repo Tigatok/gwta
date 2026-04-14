@@ -1,0 +1,44 @@
+#!/usr/bin/env zsh
+
+if [[ $# -eq 4 ]]; then
+  repo="$1"; verb="$2"; ticket="$3"; desc="$4"
+elif [[ $# -eq 3 ]]; then
+  repo="."; verb="$1"; ticket="$2"; desc="$3"
+else
+  local verbs=(
+    "feat     | A new feature"
+    "fix      | A bug fix"
+    "chore    | Build process or tooling changes"
+    "docs     | Documentation only changes"
+    "style    | Formatting, missing semicolons, etc."
+    "refactor | A code change that neither fixes a bug nor adds a feature"
+    "perf     | A code change that improves performance"
+    "test     | Adding or correcting tests"
+    "ci       | CI/CD configuration changes"
+    "revert   | Reverts a previous commit"
+  )
+
+  print "What is the repo path for the worktree? (leave empty to use current dir)"
+  read -r repo
+  [[ -z "$repo" ]] && repo="."
+
+  print ""
+  print "Conventional commit verb:"
+  for v in "${verbs[@]}"; do print "  $v"; done
+  print ""
+  print -n "Verb: "; read -r verb
+
+  print -n "Jira ticket (e.g. PRO-263): "; read -r ticket
+  print -n "Short description (e.g. filter-addons-subs): "; read -r desc
+fi
+
+local ticket_upper="${ticket:u}"
+local ticket_lower="${ticket:l}"
+local worktree_path="../${verb}-${ticket_lower}-${desc}"
+local branch="${verb}/${ticket_upper}/${desc}"
+
+print ""
+print "Running:"
+print "  git -C \"$repo\" worktree add \"$worktree_path\" -b \"$branch\""
+print ""
+git -C "$repo" worktree add "$worktree_path" -b "$branch"
