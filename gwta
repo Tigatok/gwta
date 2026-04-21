@@ -1,5 +1,17 @@
 #!/usr/bin/env zsh
 
+resolve_repo() {
+  local r="$1"
+  if [[ "$r" == "." || -z "$r" ]]; then
+    local bare="${PWD:t}.git"
+    if [[ -d "$PWD/$bare" ]]; then
+      print -- "$PWD/$bare"
+      return
+    fi
+  fi
+  print -- "$r"
+}
+
 if [[ $# -eq 4 ]]; then
   repo="$1"; verb="$2"; ticket="$3"; desc="$4"
 elif [[ $# -eq 3 ]]; then
@@ -28,9 +40,11 @@ else
   print ""
   print -n "Verb: "; read -r verb
 
-  print -n "Jira ticket (e.g. PRO-263): "; read -r ticket
-  print -n "Short description (e.g. filter-addons-subs): "; read -r desc
+  print -n "Jira ticket (e.g. XYZ-263): "; read -r ticket
+  print -n "Short description (e.g. lorem-ipsum-dolubs): "; read -r desc
 fi
+
+repo="$(resolve_repo "$repo")"
 
 local ticket_upper="${ticket:u}"
 local ticket_lower="${ticket:l}"
